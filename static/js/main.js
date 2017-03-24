@@ -9,6 +9,21 @@ var thoughtHistory = [];
 
 
 // Communication Functions
+function getLast() {
+	thoughtHistory.pop(); // Remove the current thought from history
+	if (thoughtHistory.length < 1) {
+		return null;
+	}
+	else {
+		if (thoughtHistory.length < 2) {
+			$('.previousButton').css('display','none');
+		}
+		lastThoughtId = thoughtHistory.pop();
+		getThought(lastThoughtId);
+	}
+	
+};
+
 function getThought(thoughtId = -1) {
 	if (thoughtId > 0) {
 		request = {
@@ -18,9 +33,7 @@ function getThought(thoughtId = -1) {
 	}
 	else {
 		function genExclusions() {
-			console.log('\nhistory ' + thoughtHistory);
 			exclusions = thoughtHistory.slice(Math.max(thoughtHistory.length - 5, 0));
-			console.log(exclusions);
 			return exclusions;
 		}
 		request = {
@@ -39,6 +52,15 @@ function getThought(thoughtId = -1) {
 		// Set Text Area Value
 		$("p.showerThoughtText").html(currentThought.text);
 	});
+
+	// Display Back Button if history exists
+	if (thoughtHistory.length > 0) {
+		$('.previousButton').css('display','block');
+	}
+
+	if (debug) {
+		console.log("History: " + thoughtHistory);
+	}
 };
 
 function postThought() {
@@ -56,9 +78,6 @@ function postThought() {
 		text: text
 	});
 };
-
-
-
 
 // Google Signon
 function onSignIn(googleUser) {
@@ -109,22 +128,30 @@ function sendRequest(payload) {
 		}
 	}, 'json')
 };
- // Bindings
+
+// Bindings
 $( document ).ready(function() {
-	$('.mainContainer').height($(window).height());
-	
 	// Click for next anywhere in mainContainer
-	$('.mainContainer').click(function() {
+	$('.nextButton').click(function() {
 		getThought();
+	});
+
+	$('.previousButton').click(function() {
+		getLast();
 	});
 
 	// Add resize positioning bindings
 	$( window ).on("resize", function () {
-		$('.arrowLeft').position({my: "left center", at: "left center", of: ".mainContainer"});
-		$('.arrowRight').position({my: "right center", at: "right center", of: ".mainContainer"});
+		$('.mainContainer').height($(window).height());
+		$('.previousButton').position({my: "left center", at: "left center", of: ".mainContainer"});
+		$('.nextButton').position({my: "right center", at: "right center", of: ".mainContainer"});
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	}).trigger('resize');
 
+	$('.previousButton').css('display','none');
+
+	// Get first thought
+	getThought();
 
 });
 

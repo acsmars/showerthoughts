@@ -81,7 +81,7 @@ def getThought(data):
 		keys = ["id","submitter","text","time","funny","deep","dark","dumb"]
 		c = get_db().cursor()
 		if requestedThought > -1:
-			query = 'SELECT * FROM Thoughts WHERE id = ({}) ORDER BY RANDOM() LIMIT 1'.format(requestedThought)
+			query = 'SELECT * FROM Thoughts WHERE id = ({})'.format(requestedThought)
 		else:
 			# highestViewSet = genHighestValueSet(alreadyViewed)
 			if not excludeList:
@@ -98,7 +98,7 @@ def getThought(data):
 	# Pick a thought for the client
 	try:
 		if not thought:
-			raise Exception("No matching thought")
+			raise Exception("No thoughts")
 		response = dict(zip(keys, thought))
 		if response.get("submitter"):
 			del response["submitter"]
