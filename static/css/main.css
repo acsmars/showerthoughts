@@ -50,10 +50,18 @@
 	border-left: 60px solid rgb(230,230,230);
 }
 
+.nextButton:hover {
+	border-left: 60px solid rgb(200,200,200);
+}
+
 .previousButton {
 	border-top: 60px solid transparent;
 	border-bottom: 60px solid transparent;
 	border-right: 60px solid rgb(230,230,230);
+}
+
+.previousButton:hover {
+	border-right: 60px solid rgb(200,200,200);
 }
 
 /* Alignment */
@@ -84,8 +92,7 @@ body {
 
 .showerThoughtContainer {
 	position: absolute;
-	width: 80%;
-	max-height: 70%;
+	overflow: scroll;
 	padding: 10px;
 	background: rgb(230,230,230);
 	border-radius: 10px;

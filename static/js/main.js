@@ -51,12 +51,17 @@ function getThought(thoughtId = -1) {
 
 		// Set Text Area Value
 		$("p.showerThoughtText").html(currentThought.text);
+
+		// Recenter the text window
+		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	});
 
 	// Display Back Button if history exists
 	if (thoughtHistory.length > 0) {
 		$('.previousButton').css('display','block');
 	}
+
+
 
 	if (debug) {
 		console.log("History: " + thoughtHistory);
@@ -140,14 +145,20 @@ $( document ).ready(function() {
 		getLast();
 	});
 
+
+
 	// Add resize positioning bindings
 	$( window ).on("resize", function () {
 		$('.mainContainer').height($(window).height());
+		containerWidth = $('.mainContainer').width();
+		containerHeight = $('.mainContainer').height();
+		
 		$('.previousButton').position({my: "left center", at: "left center", of: ".mainContainer"});
 		$('.nextButton').position({my: "right center", at: "right center", of: ".mainContainer"});
+		$('.showerThoughtContainer').css('width',(containerWidth - 120)+ 'px')
+		$('.showerThoughtContainer').css('max-height',(containerHeight - 300) + 'px');
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	}).trigger('resize');
-
 	$('.previousButton').css('display','none');
 
 	// Get first thought
