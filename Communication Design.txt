@@ -1,0 +1,34 @@
+Communication Design
+
+Requests and Expected Responses
+
+Request a thought
+	Send:
+		type:new
+		credentials // Optional
+		category // Optional
+		exlcudeIds: [] // Excluded thought IDs | Optional
+		requestedThought: INT // Id of specific thought requested | Optional
+
+	Receive:
+		votes:{deep:INT;funny:INT;dark:INT;}
+		text: text of shower thought
+		result: success
+
+Vote on a thought
+	Send:
+		type:vote; 
+		vote:{deep:INT;funny:INT;dark:INT}; 
+		credentials;
+
+	Receive:
+		result: success;
+
+Post a thought
+	Send:
+		type:post;
+		thought: {text:String};
+
+	Receive:
+		result: success;
+

@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>Shower Thoughts</title>
+		<!-- jQuery Import-->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+		<!-- Bootstrap -->
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+		<!-- Google Login -->
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="666243270465-6m3elm59e27996amf1jhkvmfpitfvfrp.apps.googleusercontent.com">
+
+		<!-- Mobile Rendering -->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- App CSS -->
+		<link rel="stylesheet" href="/static/css/main.css">
+
+		<!-- App Scripts -->
+		<script src="/static/js/main.js"></script>
+
+
+	</head>
+	<body>
+		<!-- Main Section -->
+		<div class="mainContainer">
+			<p class="header1 logo">Shower Thoughts!</p>
+			<div class="arrow arrowLeft"></div>
+			<div class="arrow arrowRight"></div>
+			<div class="showerThoughtContainer">
+			
+				<p class="showerThoughtText">Shower Thought Here</p>
+
+			</div>
+			
+		</div>
+		<div class="controls">
+			<button type="button" class="btn btn-info btn-lg controlButton" data-toggle="modal" data-target="#postModal">Post a Thought</button>
+			<button type="button" class="btn btn-info btn-lg controlButton" data-toggle="modal" data-target="#loginModal">Login</button>
+			
+		</div>
+
+		<!-- Post Modal -->
+		<div id="postModal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Post a Thought</h4>
+					</div>
+					<div class="modal-body">
+						<form class="postThought" onsubmit="postThought();">
+							<input type="text" id="newThoughtText"><br>
+							<input class="btn btn-default" value="Submit Thought" type="submit" id="newThoughtSubmit">
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Login Modal -->
+		<div id="loginModal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Login with Google</h4>
+					</div>
+					<div class="modal-body">
+						<span class="login-prompt">
+							<div class="g-signin2" data-onsuccess="onSignIn"></div>
+						</span>
+						<span class="logout-prompt">
+							<button class="btn btn-default" onclick="signOut();">Sign out</button>
+						</span>
+					</div>
+					<div class="modal-footer"> 
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
