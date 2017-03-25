@@ -82,6 +82,12 @@ function postThought() {
 		idToken: id_token,
 		text: text
 	});
+	postRequest.done(function() {
+		result = JSON.parse(thoughtRequest.responseText).result;
+		$("#newThoughtText").val("");
+		$('#postThoughtFeedback').text("Success!");
+		$('#postThoughtFeedback').fadeIn(1000).fadeOut(3000);
+	});
 };
 
 // Google Signon
@@ -144,8 +150,6 @@ $( document ).ready(function() {
 	$('.previousButton').click(function() {
 		getLast();
 	});
-
-
 
 	// Add resize positioning bindings
 	$( window ).on("resize", function () {

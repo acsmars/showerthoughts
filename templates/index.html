@@ -41,8 +41,17 @@
 			<div class="showerThoughtContainer">
 			
 				<p class="showerThoughtText">Shower Thought Here</p>
+				<table class="voteTable">
+					<tr>
+						<td><div class="voteIcon voteFunny"></div></td>
+						<td><div class="voteIcon voteDeep"></div></td>
+						<td><div class="voteIcon voteDark"></div></td>
+						<td><div class="voteIcon voteDumb"></div></td>
+					</tr>
+				</table>
 
 			</div>
+			
 			
 		</div>
 		<div class="controls">
@@ -62,7 +71,8 @@
 					</div>
 					<div class="modal-body">
 						<form class="postThought" onsubmit="postThought();">
-							<input type="text" id="newThoughtText"><br>
+							<textarea id="newThoughtText"></textarea><br>
+							<p style="float:left;" id="postThoughtFeedback"></p>
 							<input class="btn btn-default" value="Submit Thought" type="submit" id="newThoughtSubmit">
 						</form>
 					</div>

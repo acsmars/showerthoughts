@@ -64,6 +64,38 @@
 	border-right: 60px solid rgb(200,200,200);
 }
 
+.voteTable {
+	display: inline-table;
+
+}
+
+.voteIcon {
+	margin: 5px;
+	width: 48px;
+	height: 48px;
+}
+
+.voteFunny {
+	background-image: url("/static/images/funny.png");
+	background-size: 48px;
+}
+
+.voteDeep {
+	background-image: url("/static/images/deep.png");
+	background-size: 48px;
+}
+
+.voteDark{
+	background-image: url("/static/images/dark.png");
+	background-size: 48px;
+}
+
+.voteDumb {
+	background-image: url("/static/images/dumb.png");
+	background-size: 48px;
+
+}
+
 /* Alignment */
 body {
 	overflow-x: hidden;

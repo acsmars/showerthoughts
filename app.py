@@ -135,6 +135,10 @@ def verifyToken(token):
 		return {"email":None,"verification":"fail"}
 	return {"email":email,"verification":"pass","result":"success"}
 
+def updateVoteEntry(ID,email,funny,deep,dark,dumb):
+	c = get_db().cursor()
+	query = 'UPDATE Votes SET id = "{ID}",email = "{email}",funny = "{funny}",deep = "{deep}",dark = "{dark}",dumb = "{dumb}" WHERE email = "{email}" AND id = {ID}; INSERT OR IGNORE INTO Votes (id, email, funny, deep, dark, dumb) VALUES ("{ID}","{email}","{funny}","{deep}","{dark}","{dumb}");'.format(ID = ID, email = email, funny = funny, deep = deep, dark = dark, dumb = dumb)
+
 
 if __name__ == '__main__':
 	app.run(debug=True,host='0.0.0.0')
