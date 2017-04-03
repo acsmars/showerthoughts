@@ -69,30 +69,36 @@
 
 }
 
+.voteTable > tbody > tr > td {
+	background-color: rgb(200,200,200);
+	border-radius: 10px;
+}
+
+.voteTable > tbody > tr > td:hover {
+	background-color: rgb(170,170,170);
+}
+
 .voteIcon {
 	margin: 5px;
 	width: 48px;
 	height: 48px;
+	background-size: 48px;
 }
 
-.voteFunny {
+.voteFunny > .voteIcon {
 	background-image: url("/static/images/funny.png");
-	background-size: 48px;
 }
 
-.voteDeep {
+.voteDeep > .voteIcon {
 	background-image: url("/static/images/deep.png");
-	background-size: 48px;
 }
 
-.voteDark{
+.voteDark > .voteIcon {
 	background-image: url("/static/images/dark.png");
-	background-size: 48px;
 }
 
-.voteDumb {
+.voteDumb > .voteIcon {
 	background-image: url("/static/images/dumb.png");
-	background-size: 48px;
 
 }
 

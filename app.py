@@ -3,6 +3,7 @@ from oauth2client import client, crypt
 import json
 import sqlite3
 import random
+import time
 
 app = Flask(__name__)
 
@@ -56,39 +57,36 @@ def post():
 	except Exception as ex:
 		print(str(ex))
 		return jsonify({"exception":str(ex)}), 400
-	# Strip email if it got in somehow
-	if response.get("email"):
-		del response["email"]
 	return jsonify(response), 200
-
-# Functions
-# def login(data):
-# 	response = {}
-# 	if not data.get("idToken", None):
-# 		return {"verification":"fail"}
-# 	token = verifyToken(data.get("idToken"))
-# 	return token
 
 def getThought(data):
 	response = {}
 	category = data.get("category") # string: funny, deep, dark, or dumb
 	excludeList = data.get("excludeIds",[]) # List of ids to skip
 	requestedThought = data.get("requestedThought",-1)
+	token = None
+
+	# Logged in user. If token is not None after this, user is verified
+	if data.get("idToken", None):
+		token = verifyToken(data.get("idToken"))
+		if token.get("verification","fail") == "fail":
+			token = None
 
 
 	# Query database
 	try:
-		keys = ["id","submitter","text","time","funny","deep","dark","dumb"]
 		c = get_db().cursor()
 		if requestedThought > -1:
 			query = 'SELECT * FROM Thoughts WHERE id = ({})'.format(requestedThought)
 		else:
-			# highestViewSet = genHighestValueSet(alreadyViewed)
-			if not excludeList:
-				excludeList = [-1]
-			excludeList = map(str,excludeList) # Map all values to strings
+			# If nothing is excluded, exclude -1 for SQL legality reasons
+			if not excludeList: excludeList = [-1]
+
+			# Map all exclusion IDs to strings
+			excludeList = map(str,excludeList) 
 			query = 'SELECT * FROM Thoughts WHERE id not in ({}) ORDER BY RANDOM() LIMIT 1'.format(', '.join(excludeList))
 		thought = c.execute(query).fetchone()
+		# If no thought fits exclusions or request, get a random one
 		if not thought:
 			query = 'SELECT * FROM Thoughts ORDER BY RANDOM() LIMIT 1'
 			thought = c.execute(query).fetchone()
@@ -97,11 +95,36 @@ def getThought(data):
 
 	# Pick a thought for the client
 	try:
-		if not thought:
-			raise Exception("No thoughts")
-		response = dict(zip(keys, thought))
-		if response.get("submitter"):
-			del response["submitter"]
+		if not thought: raise Exception("No thoughts")
+
+		# Convert list from sql to dictionary
+		thoughtKeys = ["id","submitter","text","time","funny","deep","dark","dumb"]
+		thought = dict(zip(thoughtKeys, thought)) 
+		response["id"] = thought.get("id")
+		response["text"] = thought.get("text")
+		response["time"] = thought.get("time")
+		response["totalVotes"] = {"funny":thought.get("funny",0),"deep":thought.get("deep",0),"dark":thought.get("dark",0),"dumb":thought.get("dumb",0)};
+
+		# Vote information processing
+		# User is logged in
+		if token:
+			try:
+				query = 'SELECT * FROM Votes WHERE id = "{}" AND submitter = "{}" LIMIT 1'.format(thought.get("id"),token.get("email"))
+				userVote = c.execute(query).fetchone()
+				if userVote:
+					voteKeys = ["id","submitter","funny","deep","dark","dumb"]
+					userVote = dict(zip(voteKeys, userVote))
+					response["userVotes"] = userVote
+				else:
+					response["userVotes"] = {"funny":0,"deep":0,"dark":0,"dumb":0};
+			except Exception as ex:
+				raise Exception("SQL error fetching vote" + str(ex))
+
+		# User is not logged in
+		else:
+			# Logged out users have no votes
+			response["userVotes"] = {"funny":0,"deep":0,"dark":0,"dumb":0};
+
 		response["result"] = "success"
 	except Exception as ex:
 		raise Exception("Error selecting a thought: " + str(ex))
@@ -109,10 +132,19 @@ def getThought(data):
 	return response
 
 def vote(data):
+	# Authenticate
+	if not data.get("idToken", None):
+		return {"verification":"fail"}
+	token = verifyToken(data.get("idToken"))
+	if token.get("verification","fail") == "fail":
+		return {"verification":"fail"}
+	# Process vote data
+	print(data)
 	response = {}
 	return response
 
 def postThought(data):
+	# Authenticate
 	if not data.get("idToken", None):
 		return {"verification":"fail"}
 	token = verifyToken(data.get("idToken"))

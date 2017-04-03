@@ -1,12 +1,17 @@
 // Global Variables
 var currentThought = {};
 var debug = false
-
 var id_token = null;
+var ready = true; // Do not strat new requests until the last one has finished
+// User votes, updates with toggling
+var userVotes = {funny: 0, deep: 0, dark: 0, dumb: 0}
+// User votes, initial per thought
+var initialUserVotes = {funny: 0, deep: 0, dark: 0, dumb: 0}
+// Votes on the thought by other people, not including this user
+var totalVotes = {funny: 0, deep: 0, dark: 0, dumb: 0}
 
 // Thought Viewcount 
 var thoughtHistory = [];
-
 
 // Communication Functions
 function getLast() {
@@ -28,7 +33,9 @@ function getThought(thoughtId = -1) {
 	if (thoughtId > 0) {
 		request = {
 			requestedThought:thoughtId,
+			idToken: id_token,
 			type:"new"
+
 		};
 	}
 	else {
@@ -38,9 +45,11 @@ function getThought(thoughtId = -1) {
 		}
 		request = {
 			type:"new",
+			idToken: id_token,
 			excludeIds: genExclusions()
 		};
 	}
+	ready = false;
 	thoughtRequest = sendRequest(request);
 	thoughtRequest.done(function () {
 		// Parse response
@@ -49,19 +58,27 @@ function getThought(thoughtId = -1) {
 		// Add this item to history
 		thoughtHistory.push(currentThought.id);
 
+		// Update vote data
+		console.log(currentThought);
+
 		// Set Text Area Value
 		$("p.showerThoughtText").html(currentThought.text);
 
+		// Update vote counts
+		userVotes = currentThought.userVotes;
+		initialUserVotes = JSON.parse(JSON.stringify(userVotes)) // Get deep copy of userVotes
+		totalVotes = currentThought.totalVotes;
+		updateVotes();
+
 		// Recenter the text window
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
+		ready = true;
 	});
 
 	// Display Back Button if history exists
 	if (thoughtHistory.length > 0) {
 		$('.previousButton').css('display','block');
 	}
-
-
 
 	if (debug) {
 		console.log("History: " + thoughtHistory);
@@ -77,6 +94,7 @@ function postThought() {
 	if (id_token == null) {
 		return
 	}
+	ready = false;
 	postRequest = sendRequest({
 		type:"post",
 		idToken: id_token,
@@ -87,6 +105,40 @@ function postThought() {
 		$("#newThoughtText").val("");
 		$('#postThoughtFeedback').text("Success!");
 		$('#postThoughtFeedback').fadeIn(1000).fadeOut(3000);
+		ready = true;
+	});
+};
+
+// Voting Interface
+// Toggles a vote state and updates the view
+function voteToggle(voteType) {
+	userVotes[voteType] = userVotes[voteType] == 1 ? 0 : 1;
+	updateVotes();
+}
+
+// Updates the display of votes
+function updateVotes() {
+	$(".voteFunny > .voteCount").html(totalVotes.funny + userVotes.funny)
+	$(".voteDeep > .voteCount").html(totalVotes.deep + userVotes.deep)
+	$(".voteDark > .voteCount").html(totalVotes.dark + userVotes.dark)
+	$(".voteDumb > .voteCount").html(totalVotes.dumb + userVotes.dumb)
+}
+
+// Send userVotes to the server
+function castVote() {
+	if (id_token == null) {
+		return
+	}
+	ready = false;
+	postRequest = sendRequest({
+		type:"vote",
+		idToken: id_token,
+		votes: userVotes
+	});
+	postRequest.done(function() {
+		result = JSON.parse(thoughtRequest.responseText).result;
+
+		ready = true;
 	});
 };
 
@@ -109,7 +161,6 @@ function signOut() {
 	});
 	id_token = null;
 }
-
 
 // JSON post function
 $.postJSON = function(url, data, callback) {
@@ -144,12 +195,22 @@ function sendRequest(payload) {
 $( document ).ready(function() {
 	// Click for next anywhere in mainContainer
 	$('.nextButton').click(function() {
-		getThought();
+		if(ready) {
+			getThought();
+		}
 	});
 
 	$('.previousButton').click(function() {
-		getLast();
+		if(ready) {
+			getLast();
+		}
 	});
+
+	// Bind vote buttons
+	$('.voteFunny').click(function() {voteToggle('funny')});
+	$('.voteDeep').click(function() {voteToggle('deep')});
+	$('.voteDark').click(function() {voteToggle('dark')});
+	$('.voteDumb').click(function() {voteToggle('dumb')});
 
 	// Add resize positioning bindings
 	$( window ).on("resize", function () {
@@ -167,6 +228,5 @@ $( document ).ready(function() {
 
 	// Get first thought
 	getThought();
-
 });
 
