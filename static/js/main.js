@@ -116,17 +116,38 @@ function voteToggle(voteType) {
 	updateVotes();
 }
 
+// Set vote highlighting
+function setVoteHighlight(element,inverted = false) {
+	if (inverted) {
+		element.addClass('voteInverted');
+	}
+	else {
+		element.removeClass('voteInverted');
+	}
+}
+
 // Updates the display of votes
 function updateVotes() {
-	$(".voteFunny > .voteCount").html(totalVotes.funny + userVotes.funny)
-	$(".voteDeep > .voteCount").html(totalVotes.deep + userVotes.deep)
-	$(".voteDark > .voteCount").html(totalVotes.dark + userVotes.dark)
-	$(".voteDumb > .voteCount").html(totalVotes.dumb + userVotes.dumb)
+	$(".voteFunny > .voteCount").html(totalVotes.funny + userVotes.funny);
+	$(".voteDeep > .voteCount").html(totalVotes.deep + userVotes.deep);
+	$(".voteDark > .voteCount").html(totalVotes.dark + userVotes.dark);
+	$(".voteDumb > .voteCount").html(totalVotes.dumb + userVotes.dumb);
+
+	// Switches vote highlighting if selected
+	setVoteHighlight($('.voteFunny'),userVotes.funny);
+	setVoteHighlight($('.voteDeep'),userVotes.deep);
+	setVoteHighlight($('.voteDark'),userVotes.dark);
+	setVoteHighlight($('.voteDumb'),userVotes.dumb);
+
 }
 
 // Send userVotes to the server
 function castVote() {
 	if (id_token == null) {
+		return
+	}
+	if (isEquivalent(userVotes,initialUserVotes)) {
+		console.log("no change");
 		return
 	}
 	ready = false;
@@ -137,7 +158,6 @@ function castVote() {
 	});
 	postRequest.done(function() {
 		result = JSON.parse(thoughtRequest.responseText).result;
-
 		ready = true;
 	});
 };
@@ -148,10 +168,10 @@ function onSignIn(googleUser) {
 	console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 	id_token = googleUser.getAuthResponse().id_token;
 
-	// sendRequest({
-	// 	type:"login",
-	// 	idToken: id_token
-	// });
+	sendRequest({
+		type:"login",
+		idToken: id_token
+	});
 }
 
 function signOut() {
@@ -190,6 +210,22 @@ function sendRequest(payload) {
 		}
 	}, 'json')
 };
+
+// Helper function to check object equivilence
+function isEquivalent(a, b) {
+	// Create arrays of property names
+	var aProps = Object.getOwnPropertyNames(a);
+	var bProps = Object.getOwnPropertyNames(b);
+	if (aProps.length != bProps.length) { return false; }
+	for (var i = 0; i < aProps.length; i++) {
+		var propName = aProps[i];
+
+		// If values of same property are not equal,
+		// objects are not equivalent
+		if (a[propName] !== b[propName]) { return false; }
+	}
+	return true;
+}
 
 // Bindings
 $( document ).ready(function() {
