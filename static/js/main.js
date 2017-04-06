@@ -219,7 +219,7 @@ function isEquivalent(a, b) {
 	if (aProps.length != bProps.length) { return false; }
 	for (var i = 0; i < aProps.length; i++) {
 		var propName = aProps[i];
-
+''
 		// If values of same property are not equal,
 		// objects are not equivalent
 		if (a[propName] !== b[propName]) { return false; }
@@ -261,6 +261,13 @@ $( document ).ready(function() {
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	}).trigger('resize');
 	$('.previousButton').css('display','none');
+
+	// Add modal button bindings for ios
+	$('[data-toggle]').on('click', function() {
+
+		$(document).trigger('click.zf.trigger', '[data-toggle]');
+
+	});
 
 	// Get first thought
 	getThought();

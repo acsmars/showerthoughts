@@ -50,7 +50,7 @@
 	border-left: 60px solid rgb(230,230,230);
 }
 
-.nextButton:hover {
+.nextButton:hover, .nextButton:active {
 	border-left: 60px solid rgb(200,200,200);
 }
 
@@ -60,7 +60,7 @@
 	border-right: 60px solid rgb(230,230,230);
 }
 
-.previousButton:hover {
+.previousButton:hover, .previousButton:active {
 	border-right: 60px solid rgb(200,200,200);
 }
 
@@ -75,7 +75,7 @@
 	transition: all .2s ease-in-out;
 }
 
-.vote:hover {
+.vote:hover, .vote:active {
 	background-color: rgb(170,170,170);
 	transform: scale(1.1);
 }
@@ -84,7 +84,7 @@
 	background-color: rgb(170,170,170) !important;
 }
 
-.voteInverted:hover {
+.voteInverted:hover, .voteInverted:active {
 	background-color: rgb(200,200,200) !important;
 }
 
@@ -115,26 +115,45 @@
 	background-image: url("/static/images/dumb.png");
 }
 
+.modalButton {
+	position:absolute;
+	display: block;
+	margin: -5px;
+	background-color: rgb(230,230,230);
+	width: 90px;
+	height: 90px;
+	padding: 15px;
+
+}
+
+.modalButton:hover, .modalButton:active {
+	background-color: rgb(200,200,200);
+	color: rgb(140,140,140);
+}
+
+.postModalButton {
+	bottom: 0px;
+	left:0px;
+	font-size: 90px;
+	line-height: 60px;
+	color:rgb(170,170,170);
+	border-top-right-radius: 90px;
+}
+
+.loginModalButton {
+	bottom: 0px;
+	right:0px;
+	font-size: 70px;
+	line-height: 70px;
+	color:rgb(170,170,170);
+	border-top-left-radius: 90px;
+}
 
 
 /* Alignment */
-body {
-	overflow-x: hidden;
-	overflow-y: hidden;
-}
-
-.controls {
-	width: 100%;
-	position: absolute;
-	top: 100%;
-	transform: translateY(-100%);
-	padding: 10px;
-	text-align: center;
-}
-
-.controlButton {
-	max-width:600px;
-
+html, body {
+	height: 100%;
+	overflow: hidden;
 }
 
 .mainContainer {
