@@ -133,13 +133,18 @@ def getThought(data):
 
 def vote(data):
 	# Authenticate
+
 	if not data.get("idToken", None):
 		return {"verification":"fail"}
 	token = verifyToken(data.get("idToken"))
 	if token.get("verification","fail") == "fail":
 		return {"verification":"fail"}
 	# Process vote data
-	print(data)
+	submitter = token.get('email')
+	ID = data.get('thoughtId')
+	votes = data.get('votes')
+	updateVoteEntry(ID,submitter,votes.get('funny'),votes.get('deep'),votes.get('dark'),votes.get('dumb'))
+
 	response = {}
 	return response
 
@@ -153,10 +158,19 @@ def postThought(data):
 	# Add Thought to Table
 	try:
 		c = get_db().cursor()
-		c.execute('INSERT INTO Thoughts (submitter,text) VALUES ("{}","{}")'.format(token.get("email"),data.get("text")))
+		query = 'INSERT INTO Thoughts (submitter,text) VALUES ("{}","{}")'.format(token.get("email"),data.get("text"))
+		c.execute(query)
 		get_db().commit()
 	except Exception as ex:
 		raise Exception("Error inserting a thought: " + str(ex))
+	return {"result":"success"}
+
+def login(data):
+	if not data.get("idToken", None):
+		return {"verification":"fail"}
+	token = verifyToken(data.get("idToken"))
+	if token.get("verification","fail") == "fail":
+		return {"verification":"fail"}
 	return {"result":"success"}
 
 def verifyToken(token):
@@ -167,10 +181,48 @@ def verifyToken(token):
 		return {"email":None,"verification":"fail"}
 	return {"email":email,"verification":"pass","result":"success"}
 
-def updateVoteEntry(ID,email,funny,deep,dark,dumb):
+def updateVoteEntry(ID,submitter,funny,deep,dark,dumb):
 	c = get_db().cursor()
-	query = 'UPDATE Votes SET id = "{ID}",email = "{email}",funny = "{funny}",deep = "{deep}",dark = "{dark}",dumb = "{dumb}" WHERE email = "{email}" AND id = {ID}; INSERT OR IGNORE INTO Votes (id, email, funny, deep, dark, dumb) VALUES ("{ID}","{email}","{funny}","{deep}","{dark}","{dumb}");'.format(ID = ID, email = email, funny = funny, deep = deep, dark = dark, dumb = dumb)
+	# Fetch existing vote
+	query = 'SELECT * FROM Votes WHERE submitter = "{submitter}" AND id = {ID}'.format(ID = ID, submitter = submitter)
+	oldUserVote = c.execute(query).fetchone()
 
+	# Update of an existing vote
+	if oldUserVote:
+		voteKeys = ["id","submitter","funny","deep","dark","dumb"]
+		oldUserVote = dict(zip(voteKeys, oldUserVote))
+		# Calculate vote change
+		funnyDif = funny - oldUserVote.get('funny')
+		deepDif = deep - oldUserVote.get('deep')
+		darkDif = dark - oldUserVote.get('dark')
+		dumbDif = dumb - oldUserVote.get('dumb')
+
+		# Update vote if not all 0s
+		if (funny or deep or dark or dumb):
+			query = 'UPDATE Votes SET funny = "{funny}", deep = "{deep}", dark = "{dark}", dumb = "{dumb}" WHERE submitter = "{submitter}" AND id = {ID}; '.format(ID = ID, submitter = submitter, funny = funny, deep = deep, dark = dark, dumb = dumb)
+			c.execute(query)
+		# Delete vote if all 0s
+		else:
+			query = 'DELETE FROM Votes WHERE submitter = "{submitter}" AND id = {ID}; '.format(ID = ID, submitter = submitter)
+			c.execute(query)
+
+		# Update thought
+		if (funnyDif or deepDif or darkDif or dumbDif):
+			query = 'UPDATE Thoughts SET funny = funny + {funnyDif}, deep = deep + {deepDif}, dark = dark + {darkDif}, dumb = dumb + {dumbDif} WHERE id = {ID};'.format(ID = ID, funnyDif = funnyDif, deepDif = deepDif, darkDif = darkDif, dumbDif = dumbDif)
+			c.execute(query)
+		get_db().commit()
+
+	# New vote
+	else:
+		# Insert and update thought tally if not 0s
+		if (funny or deep or dark or dumb):
+			query = 'INSERT INTO Votes (id, submitter, funny, deep, dark, dumb) VALUES ("{ID}","{submitter}","{funny}","{deep}","{dark}","{dumb}");'.format(ID = ID, submitter = submitter, funny = funny, deep = deep, dark = dark, dumb = dumb)
+			c.execute(query)
+
+			# Update thought
+			query = 'UPDATE Thoughts SET funny = funny + {funny}, deep = deep + {deep}, dark = dark + {dark}, dumb = dumb + {dumb} WHERE id = {ID};'.format(ID = ID, funny = funny, deep = deep, dark = dark, dumb = dumb)
+			c.execute(query)
+			get_db().commit()
 
 if __name__ == '__main__':
 	app.run(debug=True,host='0.0.0.0')

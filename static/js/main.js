@@ -12,6 +12,7 @@ var totalVotes = {funny: 0, deep: 0, dark: 0, dumb: 0}
 
 // Thought Viewcount 
 var thoughtHistory = [];
+var dayMode = true;
 
 // Communication Functions
 function getLast() {
@@ -35,7 +36,6 @@ function getThought(thoughtId = -1) {
 			requestedThought:thoughtId,
 			idToken: id_token,
 			type:"new"
-
 		};
 	}
 	else {
@@ -58,9 +58,6 @@ function getThought(thoughtId = -1) {
 		// Add this item to history
 		thoughtHistory.push(currentThought.id);
 
-		// Update vote data
-		console.log(currentThought);
-
 		// Set Text Area Value
 		$("p.showerThoughtText").html(currentThought.text);
 
@@ -68,6 +65,11 @@ function getThought(thoughtId = -1) {
 		userVotes = currentThought.userVotes;
 		initialUserVotes = JSON.parse(JSON.stringify(userVotes)) // Get deep copy of userVotes
 		totalVotes = currentThought.totalVotes;
+		if (userVotes.funny) {totalVotes.funny -= 1};
+		if (userVotes.deep) {totalVotes.deep -= 1};
+		if (userVotes.dark) {totalVotes.dark -= 1};
+		if (userVotes.dumb) {totalVotes.dumb -= 1};
+
 		updateVotes();
 
 		// Recenter the text window
@@ -83,16 +85,17 @@ function getThought(thoughtId = -1) {
 	if (debug) {
 		console.log("History: " + thoughtHistory);
 	}
+	return thoughtRequest;
 };
 
 function postThought() {
 	event.preventDefault();
 	text = $("#newThoughtText").val();
 	if (text == "") {
-		return
+		return Promise.resolve();
 	}
 	if (id_token == null) {
-		return
+		return Promise.resolve();
 	}
 	ready = false;
 	postRequest = sendRequest({
@@ -107,13 +110,19 @@ function postThought() {
 		$('#postThoughtFeedback').fadeIn(1000).fadeOut(3000);
 		ready = true;
 	});
+	return postRequest;
 };
 
 // Voting Interface
 // Toggles a vote state and updates the view
 function voteToggle(voteType) {
-	userVotes[voteType] = userVotes[voteType] == 1 ? 0 : 1;
-	updateVotes();
+	if (id_token) {
+		userVotes[voteType] = userVotes[voteType] == 1 ? 0 : 1;
+		updateVotes();
+	}
+	else {
+		$('#loginModal').modal();
+	}
 }
 
 // Set vote highlighting
@@ -143,34 +152,42 @@ function updateVotes() {
 
 // Send userVotes to the server
 function castVote() {
+	// Returns a promise
+	// Don't vote if not logged in
 	if (id_token == null) {
-		return
+		return Promise.resolve();
 	}
+	// Don't vote if there's no change
 	if (isEquivalent(userVotes,initialUserVotes)) {
-		console.log("no change");
-		return
+		return Promise.resolve();
 	}
 	ready = false;
 	postRequest = sendRequest({
 		type:"vote",
 		idToken: id_token,
-		votes: userVotes
+		votes: userVotes,
+		thoughtId: currentThought.id
 	});
 	postRequest.done(function() {
 		result = JSON.parse(thoughtRequest.responseText).result;
 		ready = true;
+		
 	});
+	return postRequest;
 };
 
 // Google Signon
 function onSignIn(googleUser) {
 	var profile = googleUser.getBasicProfile();
-	console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 	id_token = googleUser.getAuthResponse().id_token;
 
-	sendRequest({
+	loginRequest = sendRequest({
 		type:"login",
 		idToken: id_token
+	});
+	loginRequest.done(function() {
+		$('.postModalButton').attr('data-target','#postModal');
+		console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 	});
 }
 
@@ -178,6 +195,7 @@ function signOut() {
 	var auth2 = gapi.auth2.getAuthInstance();
 	auth2.signOut().then(function () {
 		console.log('User signed out.');
+		$('.postModalButton').attr('data-target','#loginModal');
 	});
 	id_token = null;
 }
@@ -211,7 +229,7 @@ function sendRequest(payload) {
 	}, 'json')
 };
 
-// Helper function to check object equivilence
+// Helper function to deep check object equivilence
 function isEquivalent(a, b) {
 	// Create arrays of property names
 	var aProps = Object.getOwnPropertyNames(a);
@@ -219,7 +237,6 @@ function isEquivalent(a, b) {
 	if (aProps.length != bProps.length) { return false; }
 	for (var i = 0; i < aProps.length; i++) {
 		var propName = aProps[i];
-''
 		// If values of same property are not equal,
 		// objects are not equivalent
 		if (a[propName] !== b[propName]) { return false; }
@@ -227,12 +244,34 @@ function isEquivalent(a, b) {
 	return true;
 }
 
+function toggleNight() {
+	// Toggle Daymode
+	dayMode = dayMode ? false : true;
+	if (dayMode) {
+		document.documentElement.style.setProperty('--color1', 'rgb(250,250,250)');
+		document.documentElement.style.setProperty('--color2', 'rgb(230,230,230)');
+		document.documentElement.style.setProperty('--color3', 'rgb(200,200,200)');
+		document.documentElement.style.setProperty('--color4', 'rgb(170,170,170)');
+		document.documentElement.style.setProperty('--color5', 'rgb(140,140,140)');
+		document.documentElement.style.setProperty('--textColor', 'rgb(20,20,20)');
+	}
+	else {
+		document.documentElement.style.setProperty('--color1', 'rgb(50,50,50)');
+		document.documentElement.style.setProperty('--color2', 'rgb(80,80,80)');
+		document.documentElement.style.setProperty('--color3', 'rgb(110,110,110)');
+		document.documentElement.style.setProperty('--color4', 'rgb(140,140,140)');
+		document.documentElement.style.setProperty('--color5', 'rgb(170,170,170)');
+		document.documentElement.style.setProperty('--textColor', 'rgb(200,200,200)');
+	}
+}
+
 // Bindings
 $( document ).ready(function() {
-	// Click for next anywhere in mainContainer
 	$('.nextButton').click(function() {
 		if(ready) {
-			getThought();
+			castVote().then(function() {
+				getThought();
+			});
 		}
 	});
 
@@ -264,12 +303,13 @@ $( document ).ready(function() {
 
 	// Add modal button bindings for ios
 	$('[data-toggle]').on('click', function() {
-
 		$(document).trigger('click.zf.trigger', '[data-toggle]');
-
 	});
 
 	// Get first thought
 	getThought();
+
+	// Make it night!
+	toggleNight();
 });
 

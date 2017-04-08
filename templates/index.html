@@ -51,10 +51,8 @@
 					</tr>
 				</table>
 			</div>
-			
-			
 		</div>
-		<div class="modalButton postModalButton" data-toggle="modal" data-target="#postModal">+</div>
+		<div class="modalButton postModalButton" data-toggle="modal" data-target="#loginModal">+</div>
 		<div class="modalButton loginModalButton material-icons" data-toggle="modal" data-target="#loginModal">person</div>
 		<!-- Post Modal -->
 		<div id="postModal" class="modal fade" role="dialog">
@@ -83,7 +81,7 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal">&times;</button>
-						<h4 class="modal-title">Login with Google</h4>
+						<h4 class="modal-title">Account</h4>
 					</div>
 					<div class="modal-body">
 						<span class="login-prompt">
@@ -92,6 +90,10 @@
 						<span class="logout-prompt">
 							<button class="btn btn-default" onclick="signOut();">Sign out</button>
 						</span>
+					</div>
+					<hr>
+					<div class="modal-body">
+						<button class="btn btn-default nightTimeToggle" onclick="toggleNight();">Night Time Mode</button>
 					</div>
 				</div>
 			</div>
