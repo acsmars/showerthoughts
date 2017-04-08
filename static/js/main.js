@@ -15,7 +15,7 @@ var thoughtHistory = [];
 var dayMode = true;
 
 // Communication Functions
-function getLast() {
+function getPrevious() {
 	thoughtHistory.pop(); // Remove the current thought from history
 	if (thoughtHistory.length < 1) {
 		return null;
@@ -27,7 +27,6 @@ function getLast() {
 		lastThoughtId = thoughtHistory.pop();
 		getThought(lastThoughtId);
 	}
-	
 };
 
 function getThought(thoughtId = -1) {
@@ -69,7 +68,6 @@ function getThought(thoughtId = -1) {
 		if (userVotes.deep) {totalVotes.deep -= 1};
 		if (userVotes.dark) {totalVotes.dark -= 1};
 		if (userVotes.dumb) {totalVotes.dumb -= 1};
-
 		updateVotes();
 
 		// Recenter the text window
@@ -78,8 +76,9 @@ function getThought(thoughtId = -1) {
 	});
 
 	// Display Back Button if history exists
-	if (thoughtHistory.length > 0) {
+	if (thoughtHistory.length > 0 && $('.previousButton').css('display') === 'none') {
 		$('.previousButton').css('display','block');
+		$('.previousButton').position({my: "left center", at: "left center", of: ".mainContainer"});
 	}
 
 	if (debug) {
@@ -147,7 +146,6 @@ function updateVotes() {
 	setVoteHighlight($('.voteDeep'),userVotes.deep);
 	setVoteHighlight($('.voteDark'),userVotes.dark);
 	setVoteHighlight($('.voteDumb'),userVotes.dumb);
-
 }
 
 // Send userVotes to the server
@@ -162,6 +160,7 @@ function castVote() {
 		return Promise.resolve();
 	}
 	ready = false;
+	console.log(currentThought.id);
 	postRequest = sendRequest({
 		type:"vote",
 		idToken: id_token,
@@ -267,18 +266,42 @@ function toggleNight() {
 
 // Bindings
 $( document ).ready(function() {
-	$('.nextButton').click(function() {
+	function nextThought() {
 		if(ready) {
 			castVote().then(function() {
 				getThought();
 			});
 		}
+	};
+
+	function previousThought() {
+		if(ready) {
+			castVote().then(function() {
+				getPrevious();
+			});
+		}
+	};
+
+	$(window).keydown(function (e) {
+		switch(e.keyCode) {
+			case 32:
+			case 39:
+				e.preventDefault()
+				nextThought();
+				break;
+			case 37:
+				e.preventDefault()
+				previousThought();
+				break;
+		}
+	});
+
+	$('.nextButton').click(function() {
+		nextThought();
 	});
 
 	$('.previousButton').click(function() {
-		if(ready) {
-			getLast();
-		}
+		previousThought();
 	});
 
 	// Bind vote buttons
