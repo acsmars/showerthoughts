@@ -284,7 +284,6 @@ $( document ).ready(function() {
 
 	$(window).keydown(function (e) {
 		switch(e.keyCode) {
-			case 32:
 			case 39:
 				e.preventDefault()
 				nextThought();
