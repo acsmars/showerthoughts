@@ -16,6 +16,7 @@ var dayMode = true;
 
 // Communication Functions
 function getPrevious() {
+	// Loads the previous thought from history
 	thoughtHistory.pop(); // Remove the current thought from history
 	if (thoughtHistory.length < 1) {
 		return null;
@@ -30,6 +31,9 @@ function getPrevious() {
 };
 
 function getThought(thoughtId = -1) {
+	// Fetches a thought randomly or by supplied ID
+	// Requests a thought not recently seen
+	// Updates history, votes and display area with new thought
 	if (thoughtId > 0) {
 		request = {
 			requestedThought:thoughtId,
@@ -39,7 +43,7 @@ function getThought(thoughtId = -1) {
 	}
 	else {
 		function genExclusions() {
-			exclusions = thoughtHistory.slice(Math.max(thoughtHistory.length - 5, 0));
+			exclusions = thoughtHistory.slice(Math.max(thoughtHistory.length - 10, 0));
 			return exclusions;
 		}
 		request = {
@@ -88,6 +92,8 @@ function getThought(thoughtId = -1) {
 };
 
 function postThought() {
+	// Submits a thought to the server
+	// Requires authentication token (id_token)
 	event.preventDefault();
 	text = $("#newThoughtText").val();
 	if (text == "") {
@@ -115,6 +121,8 @@ function postThought() {
 // Voting Interface
 // Toggles a vote state and updates the view
 function voteToggle(voteType) {
+	// Toggles the vote state of a vote button
+	// Prompts login if the user is not logged in
 	if (id_token) {
 		userVotes[voteType] = userVotes[voteType] == 1 ? 0 : 1;
 		updateVotes();
@@ -126,6 +134,7 @@ function voteToggle(voteType) {
 
 // Set vote highlighting
 function setVoteHighlight(element,inverted = false) {
+	// Sets vote icon highlighting
 	if (inverted) {
 		element.addClass('voteInverted');
 	}
@@ -134,8 +143,8 @@ function setVoteHighlight(element,inverted = false) {
 	}
 }
 
-// Updates the display of votes
 function updateVotes() {
+	// Updates the vote highlighting and count
 	$(".voteFunny > .voteCount").html(totalVotes.funny + userVotes.funny);
 	$(".voteDeep > .voteCount").html(totalVotes.deep + userVotes.deep);
 	$(".voteDark > .voteCount").html(totalVotes.dark + userVotes.dark);
@@ -148,8 +157,8 @@ function updateVotes() {
 	setVoteHighlight($('.voteDumb'),userVotes.dumb);
 }
 
-// Send userVotes to the server
 function castVote() {
+	// Send userVotes to the server
 	// Returns a promise
 	// Don't vote if not logged in
 	if (id_token == null) {
@@ -175,6 +184,27 @@ function castVote() {
 	return postRequest;
 };
 
+function toggleNight() {
+	// Toggle Daymode
+	dayMode = dayMode ? false : true;
+	if (dayMode) {
+		document.documentElement.style.setProperty('--color1', 'rgb(250,250,250)');
+		document.documentElement.style.setProperty('--color2', 'rgb(230,230,230)');
+		document.documentElement.style.setProperty('--color3', 'rgb(200,200,200)');
+		document.documentElement.style.setProperty('--color4', 'rgb(170,170,170)');
+		document.documentElement.style.setProperty('--color5', 'rgb(140,140,140)');
+		document.documentElement.style.setProperty('--textColor', 'rgb(20,20,20)');
+	}
+	else {
+		document.documentElement.style.setProperty('--color1', 'rgb(50,50,50)');
+		document.documentElement.style.setProperty('--color2', 'rgb(80,80,80)');
+		document.documentElement.style.setProperty('--color3', 'rgb(110,110,110)');
+		document.documentElement.style.setProperty('--color4', 'rgb(140,140,140)');
+		document.documentElement.style.setProperty('--color5', 'rgb(170,170,170)');
+		document.documentElement.style.setProperty('--textColor', 'rgb(200,200,200)');
+	}
+}
+
 // Google Signon
 function onSignIn(googleUser) {
 	var profile = googleUser.getBasicProfile();
@@ -199,8 +229,9 @@ function signOut() {
 	id_token = null;
 }
 
-// JSON post function
+// Server Communication
 $.postJSON = function(url, data, callback) {
+	// JSON post function
 	return jQuery.ajax({
 		'type': 'POST',
 		'url': url,
@@ -211,8 +242,8 @@ $.postJSON = function(url, data, callback) {
 	});
 };
 
-// Send request using the post method. Returns a promise, use .done() to wait for response
 function sendRequest(payload) {
+	// Send request using the post method. Returns a promise, use .done() to wait for response
 	return $.postJSON('/data', payload, function (data, status) {
 		// Send request
 		if (debug) {
@@ -228,8 +259,9 @@ function sendRequest(payload) {
 	}, 'json')
 };
 
-// Helper function to deep check object equivilence
+// Helper Functions
 function isEquivalent(a, b) {
+	// Helper function to deep check object equivilence
 	// Create arrays of property names
 	var aProps = Object.getOwnPropertyNames(a);
 	var bProps = Object.getOwnPropertyNames(b);
@@ -241,27 +273,6 @@ function isEquivalent(a, b) {
 		if (a[propName] !== b[propName]) { return false; }
 	}
 	return true;
-}
-
-function toggleNight() {
-	// Toggle Daymode
-	dayMode = dayMode ? false : true;
-	if (dayMode) {
-		document.documentElement.style.setProperty('--color1', 'rgb(250,250,250)');
-		document.documentElement.style.setProperty('--color2', 'rgb(230,230,230)');
-		document.documentElement.style.setProperty('--color3', 'rgb(200,200,200)');
-		document.documentElement.style.setProperty('--color4', 'rgb(170,170,170)');
-		document.documentElement.style.setProperty('--color5', 'rgb(140,140,140)');
-		document.documentElement.style.setProperty('--textColor', 'rgb(20,20,20)');
-	}
-	else {
-		document.documentElement.style.setProperty('--color1', 'rgb(50,50,50)');
-		document.documentElement.style.setProperty('--color2', 'rgb(80,80,80)');
-		document.documentElement.style.setProperty('--color3', 'rgb(110,110,110)');
-		document.documentElement.style.setProperty('--color4', 'rgb(140,140,140)');
-		document.documentElement.style.setProperty('--color5', 'rgb(170,170,170)');
-		document.documentElement.style.setProperty('--textColor', 'rgb(200,200,200)');
-	}
 }
 
 // Bindings
@@ -318,7 +329,7 @@ $( document ).ready(function() {
 		$('.previousButton').position({my: "left center", at: "left center", of: ".mainContainer"});
 		$('.nextButton').position({my: "right center", at: "right center", of: ".mainContainer"});
 		$('.showerThoughtContainer').css('width',(containerWidth - 120)+ 'px')
-		$('.showerThoughtContainer').css('max-height',(containerHeight - 300) + 'px');
+		$('.showerThoughtContainer').css('max-height',(containerHeight - 200) + 'px');
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	}).trigger('resize');
 	$('.previousButton').css('display','none');
