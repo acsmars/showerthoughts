@@ -343,6 +343,9 @@ $( document ).ready(function() {
 	getThought();
 
 	// Make it night!
-	toggleNight();
+	var hour = new Date().getHours();
+	if (hour < 8 || hour >= 20) {
+		toggleNight();
+	}
 });
 

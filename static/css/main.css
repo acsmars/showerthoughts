@@ -8,6 +8,10 @@
 	--textColor: rgb(50,50,50);
 }
 
+::-webkit-scrollbar {
+	display: none;
+}
+
 /* Fonts */
 .header1 {
 	font-size:36px;

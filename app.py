@@ -233,4 +233,4 @@ def updateVoteEntry(ID,submitter,funny,deep,dark,dumb):
 			get_db().commit()
 
 if __name__ == "__main__":
-	app.run(debug=True,host="0.0.0.0")
+	app.run(host="node.acsmars.com")
