@@ -113,6 +113,10 @@ function postThought() {
 		$("#newThoughtText").val("");
 		$('#postThoughtFeedback').text("Success!");
 		$('#postThoughtFeedback').fadeIn(1000).fadeOut(3000);
+		setTimeout(function(){
+			$('#postModal').modal('toggle');
+		}, 1000);
+		
 		ready = true;
 	});
 	return postRequest;
@@ -332,6 +336,8 @@ $( document ).ready(function() {
 		$('.showerThoughtContainer').css('max-height',(containerHeight - 200) + 'px');
 		$('.showerThoughtContainer').position({my: "center center", at: "center center", of: ".mainContainer"});
 	}).trigger('resize');
+
+	// Set the display of the previous button to none by default
 	$('.previousButton').css('display','none');
 
 	// Add modal button bindings for ios
@@ -342,7 +348,7 @@ $( document ).ready(function() {
 	// Get first thought
 	getThought();
 
-	// Make it night!
+	// Make it night! (if it's nighttime')
 	var hour = new Date().getHours();
 	if (hour < 8 || hour >= 20) {
 		toggleNight();

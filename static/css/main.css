@@ -96,6 +96,14 @@ body {
 	transform: scale(1.1);
 }
 
+.vote > p {
+	display:none;
+}
+
+.vote:hover > p {
+	display: inline;
+}
+
 .voteInverted {
 	background-color: var(--color4) !important;
 }
